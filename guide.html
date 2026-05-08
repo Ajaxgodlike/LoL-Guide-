@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/LoL-Guide-/">
+    <title>游戏攻略 - LOL 英雄联盟学习站</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ---------- 攻略页面专用样式 ---------- */
+        .guide-hero {
+            position: relative;
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: var(--navbar-height);
+            background: linear-gradient(135deg, #0a0e17 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
+            overflow: hidden;
+        }
+
+        .guide-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(200, 155, 60, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
+            animation: heroGlow 8s ease-in-out infinite alternate;
+        }
+
+        .guide-hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(transparent, var(--bg-primary));
+        }
+
+        .guide-hero-content {
+            position: relative;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .guide-hero-content h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .guide-hero-content p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* 攻略主体 */
+        .guide-main {
+            padding: 40px 0 60px;
+        }
+
+        .guide-section {
+            margin-bottom: 50px;
+        }
+
+        .guide-section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+
+        .guide-section-title i {
+            color: var(--accent);
+            font-size: 1.3rem;
+        }
+
+        .guide-section-title .section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        /* 卡片网格 */
+        .guide-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .guide-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            transition: var(--transition);
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .guide-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px var(--shadow-lg), 0 0 20px var(--accent-glow);
+        }
+
+        .guide-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .guide-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(200, 155, 60, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .guide-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .guide-card-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .guide-card-body {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .guide-card-body ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .guide-card-body ul li {
+            margin-bottom: 6px;
+        }
+
+        .guide-card-body ul li:last-child {
+            margin-bottom: 0;
+        }
+
+        .guide-card-body strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* 全宽卡片 */
+        .guide-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* 段位展示 */
+        .rank-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .rank-item:hover {
+            border-color: var(--accent);
+        }
+
+        .rank-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .rank-iron { background: #534b4b; color: #a0a0a0; }
+        .rank-bronze { background: #8c5e3c; }
+        .rank-silver { background: #8a9bae; }
+        .rank-gold { background: #c89b3c; }
+        .rank-platinum { background: #48baa0; }
+        .rank-emerald { background: #0fa84e; }
+        .rank-diamond { background: #576cce; }
+        .rank-master { background: #9d48e0; }
+        .rank-grandmaster { background: #e04848; }
+        .rank-challenger { background: #f4d03f; }
+
+        /* 提示框 */
+        .guide-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(200, 155, 60, 0.08);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .guide-tip i {
+            color: var(--accent);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* 目标标签 */
+        .objective-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .objective-tag {
+            padding: 6px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .objective-tag i {
+            font-size: 0.75rem;
+        }
+
+        .objective-tag.dragon i { color: #e74c3c; }
+        .objective-tag.baron i { color: #9b59b6; }
+        .objective-tag.herald i { color: #e67e22; }
+        .objective-tag.worm i { color: #3498db; }
+        .objective-tag.tower i { color: #f39c12; }
+        .objective-tag.inhib i { color: #2ecc71; }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .guide-hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .guide-cards {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .guide-hero {
+                height: 200px;
+            }
+
+            .guide-hero-content h1 {
+                font-size: 1.6rem;
+            }
+
+            .guide-hero-content p {
+                font-size: 0.9rem;
+            }
+
+            .guide-section-title {
+                font-size: 1.2rem;
+            }
+
+            .guide-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .rank-list {
+                gap: 6px;
+            }
+
+            .rank-item {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .guide-hero-content h1 {
+                font-size: 1.3rem;
+            }
+
+            .guide-card {
+                padding: 16px;
+            }
+
+            .guide-card-header {
+                gap: 10px;
+            }
+
+            .guide-card-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i class="fas fa-gamepad"></i>
+                <span>LOL学习站</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                <a href="guide.html" class="nav-link active"><i class="fas fa-book"></i> 攻略</a>
+                <a href="index.html" class="nav-link" id="nav-favorites"><i class="fas fa-heart"></i> 收藏夹 <span class="badge" id="fav-count">0</span></a>
+                <a href="index.html" class="nav-link" id="nav-compare"><i class="fas fa-exchange-alt"></i> 英雄对比</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-toggle" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="index.html" class="mobile-link"><i class="fas fa-home"></i> 首页</a>
+        <a href="guide.html" class="mobile-link active"><i class="fas fa-book"></i> 攻略</a>
+        <a href="index.html" class="mobile-link" id="mobile-favorites"><i class="fas fa-heart"></i> 收藏夹</a>
+        <a href="index.html" class="mobile-link" id="mobile-compare"><i class="fas fa-exchange-alt"></i> 英雄对比</a>
+    </div>
+
+    <!-- 页面横幅 -->
+    <header class="guide-hero">
+        <div class="guide-hero-content">
+            <h1><i class="fas fa-scroll"></i> 游戏攻略</h1>
+            <p>从新手到王者，全方位掌握英雄联盟的核心玩法</p>
+        </div>
+        <div class="guide-hero-overlay"></div>
+    </header>
+
+    <!-- 攻略主体 -->
+    <main class="guide-main">
+        <div class="container">
+
+            <!-- 板块一：游戏模式介绍 -->
+            <section class="guide-section" id="game-modes">
+                <h2 class="guide-section-title">
+                    <span class="section-num">1</span>
+                    <i class="fas fa-gamepad"></i> 游戏模式介绍
+                </h2>
+                <div class="guide-cards">
+                    <!-- 召唤师峡谷 -->
+                    <div class="guide-card" style="animation-delay: 0ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-mountain"></i></div>
+                            <div>
+                                <div class="guide-card-title">召唤师峡谷（排位赛）</div>
+                                <div class="guide-card-subtitle">5v5 经典对战模式</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>英雄联盟最核心的竞技模式，在三条路的地图上展开5v5对战。摧毁敌方基地水晶即可获得胜利。</p>
+                            <ul>
+                                <li><strong>单双排：</strong>独自或与一名好友组队，匹配实力相近的对手</li>
+                                <li><strong>灵活组排：</strong>1-5人自由组队，段位独立计算</li>
+                                <li><strong>段位系统：</strong>从青铜到王者，共10个大段位</li>
+                                <li><strong>每局时长：</strong>通常25-40分钟</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>排位赛是提升段位的主要途径，建议先在匹配赛练习熟练后再进行排位。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 极地大乱斗 -->
+                    <div class="guide-card" style="animation-delay: 80ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-snowflake"></i></div>
+                            <div>
+                                <div class="guide-card-title">极地大乱斗（ARAM）</div>
+                                <div class="guide-card-subtitle">5v5 随机英雄娱乐模式</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>在嚎哭深渊地图上，系统随机分配英雄，双方各5名玩家在唯一一条路上展开激烈对战。</p>
+                            <ul>
+                                <li><strong>随机英雄：</strong>系统随机分配，可花费点数重新随机</li>
+                                <li><strong>一条路：</strong>纯对推模式，节奏快、团战密集</li>
+                                <li><strong>标记系统：</strong>可用雪球标记敌方，队友可传送至目标身边</li>
+                                <li><strong>每局时长：</strong>通常15-25分钟</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>大乱斗是练习团战和英雄技能的绝佳模式，适合快速上手新英雄。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 云顶之弈 -->
+                    <div class="guide-card" style="animation-delay: 160ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-chess"></i></div>
+                            <div>
+                                <div class="guide-card-title">云顶之弈（TFT）</div>
+                                <div class="guide-card-subtitle">8人自走棋策略对战</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>自走棋玩法模式，8名玩家各自运营阵容，通过购买英雄、搭配羁绊来击败对手。</p>
+                            <ul>
+                                <li><strong>经济运营：</strong>合理管理金币，决定升级、刷新商店或存利息</li>
+                                <li><strong>羁绊系统：</strong>不同英雄组合触发强力羁绊效果</li>
+                                <li><strong>装备合成：</strong>通过选秀和打野怪获取装备，提升英雄战力</li>
+                                <li><strong>赛季更新：</strong>每个赛季更新全新英雄池和羁绊机制</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 斗魂竞技场 -->
+                    <div class="guide-card" style="animation-delay: 240ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-fist-raised"></i></div>
+                            <div>
+                                <div class="guide-card-title">斗魂竞技场</div>
+                                <div class="guide-card-subtitle">2v2v2v2 对战模式</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>全新的竞技模式，4支双人队伍在特殊地图上进行多轮淘汰赛，最终存活队伍获胜。</p>
+                            <ul>
+                                <li><strong>双人组队：</strong>与一名好友组队，2v2v2v2四方混战</li>
+                                <li><strong>多轮淘汰：</strong>每轮淘汰一支队伍，直至决出最终胜者</li>
+                                <li><strong>强化选择：</strong>每轮可选择强化符文来增强英雄能力</li>
+                                <li><strong>快节奏：</strong>每局约15-20分钟</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 轮换游戏模式 -->
+                    <div class="guide-card full-width" style="animation-delay: 320ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-random"></i></div>
+                            <div>
+                                <div class="guide-card-title">轮换游戏模式</div>
+                                <div class="guide-card-subtitle">限时开放的趣味模式</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>拳头游戏定期推出的限时娱乐模式，每种模式都有独特的规则和玩法体验：</p>
+                            <ul>
+                                <li><strong>无限火力（URF）：</strong>技能几乎无消耗、冷却时间大幅缩短，极致爽快体验</li>
+                                <li><strong>终极魔典：</strong>每名英雄获得3个额外的大招技能槽位，可随机获取其他英雄的大招</li>
+                                <li><strong>克隆大作战：</strong>双方各10名玩家使用同一个英雄，上演史诗级克隆大战</li>
+                                <li><strong>无限火力+极速模式：</strong>结合无限火力与极速移动的终极娱乐体验</li>
+                                <li><strong>斗魂竞技场（限时）：</strong>特殊规则版本的斗魂竞技场</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-info-circle"></i>
+                                <span>轮换模式通常每两周更换一次，关注官方公告获取最新模式信息。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 板块二：地图常识 -->
+            <section class="guide-section" id="map-knowledge">
+                <h2 class="guide-section-title">
+                    <span class="section-num">2</span>
+                    <i class="fas fa-map-marked-alt"></i> 地图常识
+                </h2>
+                <div class="guide-cards">
+                    <!-- 召唤师峡谷 -->
+                    <div class="guide-card full-width" style="animation-delay: 0ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-mountain"></i></div>
+                            <div>
+                                <div class="guide-card-title">召唤师峡谷</div>
+                                <div class="guide-card-subtitle">经典5v5三路地图</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>召唤师峡谷是英雄联盟最经典的地图，呈对称菱形布局，包含以下核心区域：</p>
+                            <ul>
+                                <li><strong>上路（Top Lane）：</strong>地图最上方，通常由战士或坦克担任，路线较长，注重1v1对抗</li>
+                                <li><strong>中路（Mid Lane）：</strong>地图中央，通常由法师或刺客担任，路线较短，便于游走支援</li>
+                                <li><strong>下路（Bot Lane）：</strong>地图最下方，由射手（ADC）和辅助搭档，注重团队配合</li>
+                                <li><strong>野区（Jungle）：</strong>分布在三条路之间的区域，由打野位负责控制</li>
+                                <li><strong>河道（River）：</strong>连接上下半区的通道，小龙和大龙分别位于河道两侧</li>
+                                <li><strong>防御塔（Turret）：</strong>每条路各3座外塔 + 高地塔，保护基地安全</li>
+                                <li><strong>水晶（Inhibitor）：</strong>每条路各1个，摧毁后己方超级兵会涌向敌方</li>
+                                <li><strong>基地水晶（Nexus）：</strong>最终目标，摧毁即获胜</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>红蓝BUFF分别位于己方野区的上下半区，是打野位最重要的资源之一。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 野区资源 -->
+                    <div class="guide-card" style="animation-delay: 80ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-tree"></i></div>
+                            <div>
+                                <div class="guide-card-title">野区资源</div>
+                                <div class="guide-card-subtitle">打野位核心资源点</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>红色BUFF（红buff）：</strong>提供持续伤害和减速效果，适合对线期压制</li>
+                                <li><strong>蓝色BUFF（蓝buff）：</strong>提供法力回复和冷却缩减，法师英雄的核心资源</li>
+                                <li><strong>魔沼蛙 / 石甲虫：</strong>上路侧野怪营地</li>
+                                <li><strong>暗影狼 / 幽灵：</strong>中路侧野怪营地</li>
+                                <li><strong>锋喙鸟 / 蛮族怪：</strong>下路侧野怪营地</li>
+                                <li><strong>峡谷迅捷蟹：</strong>河道蟹，击杀后提供河道视野</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 极地大乱斗地图 -->
+                    <div class="guide-card" style="animation-delay: 160ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-snowflake"></i></div>
+                            <div>
+                                <div class="guide-card-title">嚎哭深渊</div>
+                                <div class="guide-card-subtitle">极地大乱斗专用地图</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>单路设计：</strong>只有一条路，没有野区和分路策略</li>
+                                <li><strong>雪球机制：</strong>可投掷雪球标记敌人，队友传送至目标身边发起进攻</li>
+                                <li><strong>草丛：</strong>路两侧分布草丛，用于埋伏和躲避技能</li>
+                                <li><strong>回血包：</strong>基地附近有治疗包，可恢复生命值</li>
+                                <li><strong>无需补刀：</strong>附近有敌方小兵死亡即可获得金币</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 关键目标 -->
+                    <div class="guide-card full-width" style="animation-delay: 240ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-dragon"></i></div>
+                            <div>
+                                <div class="guide-card-title">关键中立目标</div>
+                                <div class="guide-card-subtitle">决定比赛走向的重要资源</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>控制中立目标是取得胜利的关键，以下是召唤师峡谷中的核心目标：</p>
+                            <div class="objective-tags">
+                                <div class="objective-tag dragon"><i class="fas fa-fire"></i> <strong>元素龙：</strong>火/水/风/土/炼金科技/海克斯科技龙，击杀获得永久增益</div>
+                                <div class="objective-tag dragon"><i class="fas fa-fire-alt"></i> <strong>龙魂：</strong>击杀4条元素龙后获得龙魂，提供强力被动效果</div>
+                                <div class="objective-tag dragon"><i class="fas fa-meteor"></i> <strong>远古龙：</strong>龙魂之后出现，击杀后获得斩杀效果</div>
+                                <div class="objective-tag baron"><i class="fas fa-crown"></i> <strong>男爵（大龙）：</strong>14分钟后出现，击杀后全队获得强化小兵推塔增益</div>
+                                <div class="objective-tag herald"><i class="fas fa-chess-rook"></i> <strong>峡谷先锋：</strong>14分钟前替代男爵，可释放协助推塔</div>
+                                <div class="objective-tag worm"><i class="fas fa-bug"></i> <strong>虚空巢虫：</strong>上路侧目标，击杀后强化己方小兵对防御塔的伤害</div>
+                                <div class="objective-tag tower"><i class="fas fa-chess-rook"></i> <strong>防御塔：</strong>每条路3座外塔 + 高地塔，提供地图控制权</div>
+                                <div class="objective-tag inhib"><i class="fas fa-gem"></i> <strong>水晶：</strong>摧毁后产生超级兵，大幅增加兵线压力</div>
+                            </div>
+                            <div class="guide-tip">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>小龙和大龙是团战最常爆发争夺的位置，提前做好视野控制至关重要。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 板块三：对线攻略 -->
+            <section class="guide-section" id="lane-guide">
+                <h2 class="guide-section-title">
+                    <span class="section-num">3</span>
+                    <i class="fas fa-crosshairs"></i> 对线攻略
+                </h2>
+                <div class="guide-cards">
+                    <!-- 上路 -->
+                    <div class="guide-card" style="animation-delay: 0ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div>
+                                <div class="guide-card-title">上路对线技巧</div>
+                                <div class="guide-card-subtitle">Top Lane Strategy</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>控线（Freeze）：</strong>将兵线控制在自己塔前，让对手处于危险位置容易被gank</li>
+                                <li><strong>换血时机：</strong>在敌方补刀瞬间使用技能消耗，利用敌方技能真空期反击</li>
+                                <li><strong>TP使用：</strong>传送可用于回线止损、支援小龙团战或分推带线</li>
+                                <li><strong>打野联动：</strong>与己方打野沟通，在优势时配合越塔或入侵敌方野区</li>
+                                <li><strong>兵线管理：</strong>掌握慢推、快推、控线三种基本兵线操作</li>
+                                <li><strong>回城时机：</strong>在推完一波兵线后回城，避免损失过多经验和经济</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 中路 -->
+                    <div class="guide-card" style="animation-delay: 80ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-hat-wizard"></i></div>
+                            <div>
+                                <div class="guide-card-title">中路对线技巧</div>
+                                <div class="guide-card-subtitle">Mid Lane Strategy</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>视野控制：</strong>在河道两侧草丛放置控制守卫，监控敌方打野动向</li>
+                                <li><strong>游走时机：</strong>推完兵线后利用时间差游走上路或下路，创造人数优势</li>
+                                <li><strong>推线与控线：</strong>需要游走时快速推线，需要发育时控线在塔前安全补刀</li>
+                                <li><strong>闪现使用：</strong>中路闪现非常关键，用于进攻、逃生或配合大招</li>
+                                <li><strong>蓝BUFF争夺：</strong>法师英雄依赖蓝BUFF，与打野协调蓝BUFF归属</li>
+                                <li><strong>中路一塔：</strong>中路一塔是重要的战略资源，丢失后将失去大量地图控制权</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 下路 -->
+                    <div class="guide-card" style="animation-delay: 160ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-bullseye"></i></div>
+                            <div>
+                                <div class="guide-card-title">下路对线技巧</div>
+                                <div class="guide-card-subtitle">Bot Lane Strategy</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>2v2配合：</strong>ADC和辅助需要默契配合，抓住敌方走位失误进行消耗</li>
+                                <li><strong>辅助游走：</strong>在ADC安全时，辅助可游走中路或配合打野入侵</li>
+                                <li><strong>推塔节奏：</strong>下路推掉一塔后，ADC应转线推中塔或上路塔</li>
+                                <li><strong>小龙控制：</strong>下路距离小龙最近，是争夺小龙的前线</li>
+                                <li><strong>换血窗口：</strong>敌方ADC补刀时是辅助发起进攻的最佳时机</li>
+                                <li><strong>视野布控：</strong>辅助负责下路三角草和河道草丛的视野控制</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 野区 -->
+                    <div class="guide-card" style="animation-delay: 240ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-paw"></i></div>
+                            <div>
+                                <div class="guide-card-title">野区攻略</div>
+                                <div class="guide-card-subtitle">Jungle Strategy</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>打野路线：</strong>根据英雄特性和目标选择合适的开野路线（红开/蓝开/满血路线）</li>
+                                <li><strong>Gank时机：</strong>敌方推线过深、闪现冷却中、血量较低时是最佳gank时机</li>
+                                <li><strong>资源控制：</strong>规划好小龙、大龙、先锋的刷新时间，提前做好视野</li>
+                                <li><strong>反野：</strong>在敌方打野出现在其他路时，入侵敌方野区偷取资源</li>
+                                <li><strong>视野布控：</strong>在关键目标附近放置控制守卫，掌握敌方动向</li>
+                                <li><strong>节奏把控：</strong>根据局势选择帮优不帮劣或帮助劣势路稳住局面</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 通用技巧 -->
+                    <div class="guide-card full-width" style="animation-delay: 320ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-star"></i></div>
+                            <div>
+                                <div class="guide-card-title">通用对线技巧</div>
+                                <div class="guide-card-subtitle">适用于所有位置的核心技巧</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>补刀（CS）：</strong>最后一下击杀小兵获得金币，是经济的最主要来源。目标：每分钟7-10刀</li>
+                                <li><strong>视野控制：</strong>购买控制守卫（75金币），在关键位置放置视野，掌握敌方动向</li>
+                                <li><strong>回城时机：</strong>推完一波兵线后回城，避免损失经验和经济；回家前确保身上有足够金币购买核心装备</li>
+                                <li><strong>等级压制：</strong>比对手先到2级、3级、6级时是强势期，可主动发起进攻</li>
+                                <li><strong>技能冷却：</strong>记住敌方关键技能的冷却时间，在敌方技能真空期发起进攻</li>
+                                <li><strong>兵线理解：</strong>兵线位置决定了对线的安全性，被压在塔下补刀会损失大量经济</li>
+                                <li><strong>小地图意识：</strong>养成每隔几秒看一次小地图的习惯，关注敌方打野位置</li>
+                                <li><strong>装备选择：</strong>根据敌方阵容和对线情况灵活调整出装顺序</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>补刀是英雄联盟最基础也最重要的技能，良好的补刀能力是上分的基石。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 板块四：段位系统 -->
+            <section class="guide-section" id="rank-system">
+                <h2 class="guide-section-title">
+                    <span class="section-num">4</span>
+                    <i class="fas fa-trophy"></i> 段位系统
+                </h2>
+                <div class="guide-cards">
+                    <!-- 段位一览 -->
+                    <div class="guide-card full-width" style="animation-delay: 0ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-medal"></i></div>
+                            <div>
+                                <div class="guide-card-title">段位一览</div>
+                                <div class="guide-card-subtitle">从坚韧黑铁到最强王者</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <p>英雄联盟排位赛段位从低到高依次为：</p>
+                            <div class="rank-list">
+                                <div class="rank-item"><div class="rank-icon rank-iron"><i class="fas fa-shield-alt"></i></div> 黑铁 (Iron)</div>
+                                <div class="rank-item"><div class="rank-icon rank-bronze"><i class="fas fa-shield-alt"></i></div> 青铜 (Bronze)</div>
+                                <div class="rank-item"><div class="rank-icon rank-silver"><i class="fas fa-shield-alt"></i></div> 白银 (Silver)</div>
+                                <div class="rank-item"><div class="rank-icon rank-gold"><i class="fas fa-shield-alt"></i></div> 黄金 (Gold)</div>
+                                <div class="rank-item"><div class="rank-icon rank-platinum"><i class="fas fa-shield-alt"></i></div> 铂金 (Platinum)</div>
+                                <div class="rank-item"><div class="rank-icon rank-emerald"><i class="fas fa-shield-alt"></i></div> 翡翠 (Emerald)</div>
+                                <div class="rank-item"><div class="rank-icon rank-diamond"><i class="fas fa-shield-alt"></i></div> 钻石 (Diamond)</div>
+                                <div class="rank-item"><div class="rank-icon rank-master"><i class="fas fa-shield-alt"></i></div> 大师 (Master)</div>
+                                <div class="rank-item"><div class="rank-icon rank-grandmaster"><i class="fas fa-shield-alt"></i></div> 宗师 (Grandmaster)</div>
+                                <div class="rank-item"><div class="rank-icon rank-challenger"><i class="fas fa-shield-alt"></i></div> 王者 (Challenger)</div>
+                            </div>
+                            <div class="guide-tip">
+                                <i class="fas fa-info-circle"></i>
+                                <span>黑铁到翡翠每个大段位分为4个小段（I、II、III、IV），I为最高。钻石及以上不再分小段。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 胜点与晋级赛 -->
+                    <div class="guide-card" style="animation-delay: 80ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-chart-line"></i></div>
+                            <div>
+                                <div class="guide-card-title">胜点（LP）与晋级赛</div>
+                                <div class="guide-card-subtitle">Ranking Points & Promotion</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>胜点获取：</strong>每场排位赛胜利获得约15-25LP，失败扣除约15-25LP</li>
+                                <li><strong>小段晋级：</strong>达到100LP后进入BO3晋级赛（三局两胜），获胜升入下一个小段</li>
+                                <li><strong>大段晋级：</strong>从IV段升入下一个大段I段时，需要通过BO5晋级赛（五局三胜）</li>
+                                <li><strong>败点保护：</strong>0LP时输掉比赛不会立即降段，会给予一次败点保护</li>
+                                <li><strong>隐藏分（MMR）：</strong>系统根据隐藏分匹配对手，影响LP的获取和扣除量</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>如果隐藏分高于当前段位，每场可获得更多LP、扣除更少LP，这被称为"补分"。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 软重置与赛季结算 -->
+                    <div class="guide-card" style="animation-delay: 160ms;">
+                        <div class="guide-card-header">
+                            <div class="guide-card-icon"><i class="fas fa-sync-alt"></i></div>
+                            <div>
+                                <div class="guide-card-title">软重置与赛季结算</div>
+                                <div class="guide-card-subtitle">Season Reset & Rewards</div>
+                            </div>
+                        </div>
+                        <div class="guide-card-body">
+                            <ul>
+                                <li><strong>赛季软重置：</strong>每个新赛季开始时，段位会进行软重置，根据上赛季最终段位和隐藏分重新计算</li>
+                                <li><strong>定位赛：</strong>新赛季需要进行定位赛来确定初始段位</li>
+                                <li><strong>赛季奖励：</strong>达到黄金及以上段位可获得胜利之矛图标、皮肤奖励等</li>
+                                <li><strong>赛季结算：</strong>赛季结束时根据最高达到的段位发放奖励</li>
+                                <li><strong>排位队列：</strong>单双排和灵活组排段位独立计算，可分别获得奖励</li>
+                            </ul>
+                            <div class="guide-tip">
+                                <i class="fas fa-gift"></i>
+                                <span>赛季奖励通常包括专属头像边框、胜利之矛图标、皮肤碎片和钥匙碎片等。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p class="footer-brand"><i class="fas fa-gamepad"></i> LOL学习站</p>
+                    <p class="footer-credit">Created with <i class="fas fa-heart" style="color:#e74c3c"></i> by <strong>粥粥</strong></p>
+                </div>
+                <div class="footer-links">
+                    <p>英雄数据来源于 Riot Games Data Dragon API</p>
+                    <p>League of Legends &copy; Riot Games, Inc.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 主题切换 & 移动端菜单 -->
+    <script>
+        (function () {
+            'use strict';
+
+            // ---------- 主题切换 ----------
+            const themeToggle = document.getElementById('theme-toggle');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function loadTheme() {
+                const savedTheme = localStorage.getItem('lol_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const icon = themeToggle.querySelector('i');
+                icon.className = savedTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            function toggleTheme() {
+                const html = document.documentElement;
+                const isDark = html.getAttribute('data-theme') !== 'light';
+                html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                localStorage.setItem('lol_theme', isDark ? 'light' : 'dark');
+                const icon = themeToggle.querySelector('i');
+                icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // ---------- 移动端菜单 ----------
+            mobileMenuBtn.addEventListener('click', function () {
+                mobileMenu.classList.toggle('active');
+            });
+
+            // ---------- 收藏数量同步 ----------
+            try {
+                var favCount = JSON.parse(localStorage.getItem('lol_favorites') || '[]').length;
+                var badges = document.querySelectorAll('#fav-count');
+                badges.forEach(function (b) { b.textContent = favCount; });
+            } catch (e) {}
+
+            // ---------- 卡片入场动画 ----------
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.guide-card').forEach(function (card) {
+                observer.observe(card);
+            });
+
+            // ---------- 初始化 ----------
+            loadTheme();
+        })();
+    </script>
+</body>
+</html>
